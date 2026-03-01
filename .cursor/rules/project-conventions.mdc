@@ -1,0 +1,56 @@
+---
+description: Core project context and conventions for the Conduit test framework. Applies to all files.
+alwaysApply: true
+---
+
+# Conduit test framework — project conventions
+
+## What this project is
+
+A Playwright + TypeScript test framework targeting the Conduit RealWorld API and UI at `https://conduit.bondaracademy.com`. The codebase is split into an API layer (with a custom `RequestHandler`, fixtures, logger, schema validation, custom matchers) and a UI layer (Playwright browser tests, page objects coming next).
+
+## Project structure
+
+```
+config/test-config.ts          — central config; URLs + env-based credentials
+request-objects/               — base JSON payloads (POST-article.json, POST-user.json)
+response-schemas/              — Ajv JSON schemas organised by resource
+tests/api-tests/
+  utils/
+    request-handler.ts         — fluent HTTP client (THE API layer core)
+    fixtures.ts                — Playwright fixtures: api, config, authToken, attachApiLogs
+    logger.ts                  — APILogger: captures request/response per test
+    custom-expect.ts           — custom matchers: shouldBe, shouldEqual, shouldMatchSchema
+    schema-validator.ts        — Ajv validator + genson-js schema generator
+    data-generator.ts          — Faker-powered generators: getNewRandomArticle, getNewRandomUser
+  helpers/createToken.ts       — standalone login helper → "Token <jwt>"
+  *.spec.ts                    — test files
+tests/ui-tests/
+  pages/                       — (coming) page object classes, one per page
+  *.spec.ts                    — UI test files
+playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-testing
+```
+
+## Hard rules — never break these
+
+- **Never bypass `RequestHandler`.** All API calls go through it. Do not use `request.get/post/...` directly in specs or fixtures.
+- **Never import `test` from `@playwright/test` in API spec files.** Always import from `./utils/fixtures` to get the custom `api`, `config`, and `authToken` fixtures.
+- **Never import `expect` from `@playwright/test` in API spec files.** Always import from `./utils/custom-expect` to get API-log-enriched matchers.
+- **Never hardcode credentials or base URLs** in spec files. Use the `config` fixture or `config/test-config.ts`.
+- **Never mutate imported request objects directly.** Always use `structuredClone` or `getNewRandomArticle()` / `getNewRandomUser()` from `data-generator.ts`.
+
+## Adding new files
+
+| What | Where |
+|------|-------|
+| New API spec | `tests/api-tests/` |
+| New UI spec | `tests/ui-tests/` |
+| New page object | `tests/ui-tests/pages/<PageName>.ts` |
+| New request payload | `request-objects/` |
+| New response schema | `response-schemas/<resource>/` |
+| New data generator | `tests/api-tests/utils/data-generator.ts` |
+| New custom matcher | `tests/api-tests/utils/custom-expect.ts` |
+
+## Config and environments
+
+`TEST_ENV` env var selects `dev` / `qa` / `prod`. Credentials come from `.env` (never committed). The `config` fixture injects the resolved config into any test — no direct imports needed in specs.

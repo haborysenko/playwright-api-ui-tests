@@ -1,0 +1,115 @@
+---
+description: Patterns and rules for writing UI tests and page objects in this framework.
+globs: tests/ui-tests/**/*.ts
+alwaysApply: false
+---
+
+# UI test patterns
+
+## Page Object Model (coming)
+
+Page objects will live in `tests/ui-tests/pages/`. One class per page. Each method represents one user-visible action or assertion.
+
+```
+tests/ui-tests/
+  pages/
+    HomePage.ts
+    LoginPage.ts
+    ArticlePage.ts
+    EditorPage.ts
+    ProfilePage.ts
+  smokeUItest.spec.ts
+  *.spec.ts
+```
+
+### Page object template
+
+```ts
+import { Page, Locator } from '@playwright/test'
+
+export class LoginPage {
+  readonly page: Page
+  readonly emailInput: Locator
+  readonly passwordInput: Locator
+  readonly signInButton: Locator
+
+  constructor(page: Page) {
+    this.page = page
+    this.emailInput = page.getByRole('textbox', { name: 'Email' })
+    this.passwordInput = page.getByRole('textbox', { name: 'Password' })
+    this.signInButton = page.getByRole('button', { name: 'Sign in' })
+  }
+
+  async goto() {
+    await this.page.goto('/login')
+  }
+
+  async login(email: string, password: string) {
+    await this.emailInput.fill(email)
+    await this.passwordInput.fill(password)
+    await this.signInButton.click()
+  }
+}
+```
+
+### Page object rules
+
+- **Locators are class properties** — defined in the constructor, not inline in methods.
+- **Methods encapsulate actions** — one method = one user action or step. Tests call methods, not raw locators.
+- **No assertions in page objects** — assertions stay in specs. Page objects only interact.
+- **Use `getByRole`, `getByLabel`, `getByText`** for locators — prefer semantic selectors over CSS/XPath.
+
+## UI spec template
+
+```ts
+import { test, expect } from '@playwright/test'
+import { LoginPage } from './pages/LoginPage'
+
+test('user can sign in', async ({ page }) => {
+  const loginPage = new LoginPage(page)
+  await loginPage.goto()
+  await loginPage.login(process.env.DEV_USERNAME!, process.env.DEV_PASSWORD!)
+  await expect(page.getByRole('button', { name: 'New Article' })).toBeVisible()
+})
+```
+
+## API-assisted UI tests
+
+For tests that need data already in the system (e.g. an article to view), use Playwright's `request` fixture in `beforeEach` or `test.beforeAll` to set up state via the API — do not drive the UI just to create prerequisites.
+
+```ts
+test.beforeEach(async ({ request }) => {
+  // create article via API so UI test can find it
+  await request.post('https://conduit-api.bondaracademy.com/api/articles', {
+    headers: { Authorization: authToken },
+    data: { article: { title: '...', description: '...', body: '...' } },
+  })
+})
+```
+
+Or reuse `createToken` and `RequestHandler` directly for full framework consistency.
+
+## Locator strategy — preference order
+
+1. `getByRole` — most resilient to UI changes
+2. `getByLabel` — for form fields
+3. `getByText` — for visible text
+4. `getByTestId` — if `data-testid` attributes are added
+5. CSS selector — last resort
+
+## Config
+
+UI base URL comes from `playwright.config.ts` → `use.baseURL` (set from `config.ui.baseURL`). Use relative paths in `page.goto()`:
+
+```ts
+await page.goto('/')          // https://conduit.bondaracademy.com/
+await page.goto('/login')     // https://conduit.bondaracademy.com/login
+```
+
+## Run UI tests
+
+```bash
+npx playwright test --project=ui-testing          # headless
+npx playwright test --project=ui-testing --headed  # see the browser
+npx playwright test --project=ui-testing --debug   # step through with inspector
+```
