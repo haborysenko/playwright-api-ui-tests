@@ -4,7 +4,7 @@ import { PageManager } from "../../page-objects/page-manager";
 import { expectValidationError } from "./utils/ui-expect";
 import { config } from "../../config/test-config";
 
-test.describe("Article UI | form validation", () => {
+test.describe("Article UI | new article form required-field validation", () => {
   const validTitle = faker.lorem.words(3);
   const validDescription = faker.lorem.sentence();
   const validBody = faker.lorem.paragraph();
@@ -21,7 +21,7 @@ test.describe("Article UI | form validation", () => {
     await pm.navigateTo().newArticlePage();
   });
 
-  test("should show error when title is empty", async ({ page }) => {
+  test("should show validation error when title is empty", async ({ page }) => {
     const pm = new PageManager(page);
     await pm.article().fillDescription(validDescription);
     await pm.article().fillBody(validBody);
@@ -30,7 +30,7 @@ test.describe("Article UI | form validation", () => {
     await expectValidationError(pm.article().validationErrors(), titleRequiredError);
   });
 
-  test("should show error when description is empty", async ({ page }) => {
+  test("should show validation error when description is empty", async ({ page }) => {
     const pm = new PageManager(page);
     await pm.article().fillTitle(validTitle);
     await pm.article().fillBody(validBody);
@@ -39,7 +39,7 @@ test.describe("Article UI | form validation", () => {
     await expectValidationError(pm.article().validationErrors(), descriptionRequiredError);
   });
 
-  test("should show error when body is empty", async ({ page }) => {
+  test("should show validation error when body is empty", async ({ page }) => {
     const pm = new PageManager(page);
     await pm.article().fillTitle(validTitle);
     await pm.article().fillDescription(validDescription);

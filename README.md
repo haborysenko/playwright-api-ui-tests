@@ -18,18 +18,19 @@ npx playwright show-report # open HTML report
 
 ```
 config/test-config.ts            — URLs and credentials (single source of truth)
+docs/api-endpoints.md            — centralized API endpoint reference (used in tests + link to full spec)
 request-objects/                 — base JSON payloads (POST_article.json, POST_user.json)
 response-schemas/                — Ajv JSON schemas by resource
 page-objects/                    — Page Object Model: PageManager + page classes
 tests/api-tests/
   utils/                         — RequestHandler, fixtures, logger, custom-expect, schema-validator, data-generator
   helpers/create-token.ts        — standalone login helper → "Token <jwt>"
-  smoke-test.spec.ts             — CRUD operations
-  negative-tests.spec.ts         — data-driven validation cases
+  article-crud.spec.ts                 — article CRUD
+  user-registration-negative.spec.ts   — registration negative cases (invalid username → 422)
 tests/ui-tests/
-  article-form-validation.spec.ts       — form validation
-  create-update-delete-flow.spec.ts     — full UI CRUD flow
-  update-article-via-ui.spec.ts         — hybrid: API setup + UI interaction
+  article-form-validation.spec.ts       — form validation (required fields)
+  article-crud-flow.spec.ts            — full CRUD via UI
+  article-update-with-api-setup.spec.ts — update via UI (article created via API)
 playwright.config.ts             — projects: api-testing, api-testing-smoke, ui-testing
 ```
 

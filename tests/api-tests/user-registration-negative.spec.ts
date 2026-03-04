@@ -13,9 +13,9 @@ const cases = [
   },
 ];
 
-test.describe("User API | registration validation", () => {
+test.describe("User API | registration negative cases (invalid username → 422)", () => {
   for (const { username, expectedErrorMessage } of cases) {
-    test(`should return 422 when username is "${username}"`, async ({ api }) => {
+    test(`should return 422 and username error when username is "${username}"`, async ({ api }) => {
       const userRequest = getNewRandomUser();
       userRequest.user.username = username;
 

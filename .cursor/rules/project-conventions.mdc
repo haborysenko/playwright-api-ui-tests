@@ -13,7 +13,7 @@ A Playwright + TypeScript test framework targeting the Conduit RealWorld API and
 
 | What | Convention | Examples |
 |---|---|---|
-| **Files and folders** | kebab-case | `smoke-test.spec.ts`, `page-manager.ts`, `create-token.ts`, `request-objects/` |
+| **Files and folders** | kebab-case | `article-crud.spec.ts`, `page-manager.ts`, `create-token.ts`, `request-objects/` |
 | **Classes and types** | PascalCase | `class ArticlePage {}`, `type UserRole = ...` |
 | **Functions, variables, methods** | camelCase | `async function createToken()`, `const authToken = ...` |
 | **Test IDs / selectors** | kebab-case | `data-testid="submit-button"` |
@@ -25,6 +25,8 @@ A Playwright + TypeScript test framework targeting the Conduit RealWorld API and
 ```
 config/
   test-config.ts              — central config: URLs + credentials
+docs/
+  api-endpoints.md            — centralized API endpoint list (used in tests + link to full spec)
 request-objects/
   POST_article.json           — base payload for article creation
   POST_user.json              — base payload for user registration
@@ -47,14 +49,14 @@ tests/api-tests/
     data-generator.ts         — Faker-powered generators: getNewRandomArticle, getNewRandomUser
   helpers/
     create-token.ts           — standalone login helper → "Token <jwt>"
-  smoke-test.spec.ts          — CRUD operations smoke test
-  negative-tests.spec.ts      — data-driven negative/validation cases
+  article-crud.spec.ts                  — article CRUD operations
+  user-registration-negative.spec.ts    — registration negative cases (invalid username → 422)
 tests/ui-tests/
   utils/
     ui-expect.ts              — UI assertion helpers
-  article-form-validation.spec.ts   — form validation UI tests
-  create-update-delete-flow.spec.ts — full UI CRUD flow
-  update-article-via-ui.spec.ts     — hybrid: API setup + UI interaction
+  article-form-validation.spec.ts       — article form validation (required fields)
+  article-crud-flow.spec.ts             — full article CRUD via UI
+  article-update-with-api-setup.spec.ts — article update via UI (article created via API)
 playwright.config.ts          — projects: api-testing, api-testing-smoke, ui-testing
 ```
 

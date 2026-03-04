@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { PageManager } from "../../page-objects/page-manager";
 import { config } from "../../config/test-config";
 
-test.describe("Article UI | create, update and delete flow", () => {
+test.describe("Article UI | full CRUD flow (create, update, delete)", () => {
   const articleData = {
     initialTitle: faker.lorem.words(3),
     updatedTitle: faker.lorem.words(3),
@@ -22,7 +22,7 @@ test.describe("Article UI | create, update and delete flow", () => {
     await pm.auth().login(config.api.userEmail, config.api.userPassword);
   });
 
-  test("should create, update and delete an article", async ({ page }) => {
+  test("should create article, then update it, then delete it via UI", async ({ page }) => {
     const pm = new PageManager(page);
 
     await pm.navigateTo().newArticlePage();
