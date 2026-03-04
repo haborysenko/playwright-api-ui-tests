@@ -34,14 +34,5 @@ export default defineConfig({
         headless: false, // browser visible when running UI tests (override with --headed=false for headless)
       },
     },
-    {
-      name: "ui-testing-smoke",
-      testDir: "./tests/ui-tests",
-      testMatch: "smoke*",
-      use: {
-        defaultBrowserType: "chromium",
-        headless: false,
-      },
-    },
   ],
 });

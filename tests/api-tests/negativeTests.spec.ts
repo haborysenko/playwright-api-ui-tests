@@ -13,20 +13,24 @@ const cases = [
   },
 ];
 
-for (const { username, expectedErrorMessage } of cases) {
-  test(`should return 422 when username is ${username}`, async ({ api }) => {
-    const userRequest = getNewRandomUser(); // valid faker email & password; we only vary username
-    userRequest.user.username = username;
-    const newUserResponse = await api
-      .path("/users")
-      .body(userRequest)
-      .postRequest(422);
-    await expect(newUserResponse).shouldMatchSchema(
-      "users",
-      "POST_user_negative_schema",
-      false,
-    );
-    const usernameErrors = newUserResponse.errors?.username ?? [];
-    expect(usernameErrors[0]).shouldBe(expectedErrorMessage);
-  });
-}
+test.describe("User API | registration validation", () => {
+  for (const { username, expectedErrorMessage } of cases) {
+    test(`should return 422 when username is "${username}"`, async ({ api }) => {
+      const userRequest = getNewRandomUser();
+      userRequest.user.username = username;
+
+      const newUserResponse = await api
+        .path("/users")
+        .body(userRequest)
+        .postRequest(422);
+
+      await expect(newUserResponse).shouldMatchSchema(
+        "users",
+        "POST_user_negative_schema",
+        false,
+      );
+      const usernameErrors = newUserResponse.errors?.username ?? [];
+      expect(usernameErrors[0]).shouldBe(expectedErrorMessage);
+    });
+  }
+});

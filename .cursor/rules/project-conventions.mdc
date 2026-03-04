@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## What this project is
 
-A Playwright + TypeScript test framework targeting the Conduit RealWorld API and UI at `https://conduit.bondaracademy.com`. The codebase is split into an API layer (with a custom `RequestHandler`, fixtures, logger, schema validation, custom matchers) and a UI layer (Playwright browser tests, page objects coming next).
+A Playwright + TypeScript test framework targeting the Conduit RealWorld API and UI at `https://conduit.bondaracademy.com`. The codebase is split into an API layer (with a custom `RequestHandler`, fixtures, logger, schema validation, custom matchers) and a UI layer (Playwright browser tests, Page Object Model).
 
 ## Project structure
 
@@ -15,6 +15,12 @@ A Playwright + TypeScript test framework targeting the Conduit RealWorld API and
 config/test-config.ts          — central config; URLs + env-based credentials
 request-objects/               — base JSON payloads (POST-article.json, POST-user.json)
 response-schemas/              — Ajv JSON schemas organised by resource
+page-objects/
+  helperBase.ts                — base class: page property + shared helpers
+  pageManager.ts               — facade: new PageManager(page) → navigateTo(), auth(), article()
+  navigationPage.ts            — extends HelperBase: navigation actions
+  authPage.ts                  — extends HelperBase: login
+  articlePage.ts               — extends HelperBase: article create/update/delete/validation
 tests/api-tests/
   utils/
     request-handler.ts         — fluent HTTP client (THE API layer core)
@@ -26,7 +32,7 @@ tests/api-tests/
   helpers/createToken.ts       — standalone login helper → "Token <jwt>"
   *.spec.ts                    — test files
 tests/ui-tests/
-  pages/                       — (coming) page object classes, one per page
+  utils/uiExpect.ts            — UI assertion helpers
   *.spec.ts                    — UI test files
 playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-testing
 ```
@@ -45,7 +51,7 @@ playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-
 |------|-------|
 | New API spec | `tests/api-tests/` |
 | New UI spec | `tests/ui-tests/` |
-| New page object | `tests/ui-tests/pages/<PageName>.ts` |
+| New page object | `page-objects/<PageName>.ts` |
 | New request payload | `request-objects/` |
 | New response schema | `response-schemas/<resource>/` |
 | New data generator | `tests/api-tests/utils/data-generator.ts` |

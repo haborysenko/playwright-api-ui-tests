@@ -2,11 +2,11 @@ import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 import { PageManager } from "../../page-objects/pageManager";
 import { createToken } from "../api-tests/helpers/createToken";
+import { RequestHandler } from "../api-tests/utils/request-handler";
+import { APILogger } from "../api-tests/utils/logger";
 import { config } from "../../config/test-config";
 
-test.describe("update article via UI (API setup/teardown)", () => {
-  const apiBaseUrl = config.api.baseUrl;
-
+test.describe("Article UI | hybrid API setup and UI interaction", () => {
   const articleData = {
     title: faker.lorem.words(3),
     description: faker.lorem.sentence(),
@@ -24,47 +24,37 @@ test.describe("update article via UI (API setup/teardown)", () => {
   let articleSlug: string;
 
   test.beforeEach("create article via API", async ({ request }) => {
-    const email = process.env.DEV_USERNAME;
-    const password = process.env.DEV_PASSWORD;
-    if (!email || !password) {
-      throw new Error("Set DEV_USERNAME and DEV_PASSWORD in .env");
-    }
+    authToken = await createToken(config.api.userEmail, config.api.userPassword);
+    const api = new RequestHandler(request, config.api.baseUrl, new APILogger(), authToken);
 
-    authToken = await createToken(email, password);
-
-    const response = await request.post(`${apiBaseUrl}/articles`, {
-      headers: { Authorization: authToken },
-      data: {
+    const createArticleResponse = await api
+      .path("/articles")
+      .body({
         article: {
           title: articleData.title,
           description: articleData.description,
           body: articleData.body,
         },
-      },
-    });
+      })
+      .postRequest(201);
 
-    const body = await response.json();
-    articleSlug = body.article.slug;
+    articleSlug = createArticleResponse.article.slug;
   });
 
-  test.beforeEach("login and open article edit page via UI", async ({ page }) => {
-    const email = process.env.DEV_USERNAME;
-    const password = process.env.DEV_PASSWORD;
-
+  test.beforeEach("log in and navigate to article via UI", async ({ page }) => {
     const pm = new PageManager(page);
     await pm.navigateTo().gotoHome();
     await pm.navigateTo().loginPage();
-    await pm.auth().login(email!, password!);
+    await pm.auth().login(config.api.userEmail, config.api.userPassword);
     await page.goto(`/article/${articleSlug}`);
   });
 
   test.afterEach("delete article via API", async ({ request }) => {
-    await request.delete(`${apiBaseUrl}/articles/${articleSlug}`, {
-      headers: { Authorization: authToken },
-    });
+    const api = new RequestHandler(request, config.api.baseUrl, new APILogger(), authToken);
+    await api.path(`/articles/${articleSlug}`).deleteRequest(204);
   });
 
-  test("update article via UI", async ({ page }) => {
+  test("should update article title and body via UI", async ({ page }) => {
     const pm = new PageManager(page);
 
     await pm

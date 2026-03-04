@@ -20,7 +20,6 @@ export class NavigationPage extends HelperBase {
 
   async newArticlePage() {
     await this.page.getByRole("link", { name: "New Article" }).click();
-    // Wait just to demonstrate the use of the helper base class
-    await this.waitForNumberOfSeconds(1);
+    await this.waitForNumberOfSeconds(1); // allow the editor form to fully render before filling fields
   }
 }

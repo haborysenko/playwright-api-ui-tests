@@ -1,16 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 import { PageManager } from "../../page-objects/pageManager";
+import { config } from "../../config/test-config";
 
-test.describe("article smoke tests", () => {
-  const createArticleData = {
-    title: faker.lorem.words(3),
-    description: faker.lorem.sentence(),
-    body: faker.lorem.paragraph(),
-    tag: faker.lorem.word(),
-  };
-
-  const updateArticleData = {
+test.describe("Article UI | create, update and delete flow", () => {
+  const articleData = {
     initialTitle: faker.lorem.words(3),
     updatedTitle: faker.lorem.words(3),
     initialDescription: faker.lorem.sentence(),
@@ -20,41 +14,38 @@ test.describe("article smoke tests", () => {
     initialTag: faker.lorem.word(),
     updatedTag: faker.lorem.word(),
   };
+
   test.beforeEach(async ({ page }) => {
-    const email = process.env.DEV_USERNAME;
-    const password = process.env.DEV_PASSWORD;
-    if (!email || !password) {
-      throw new Error("Set DEV_USERNAME and DEV_PASSWORD in .env");
-    }
     const pm = new PageManager(page);
     await pm.navigateTo().gotoHome();
     await pm.navigateTo().loginPage();
-    await pm.auth().login(email, password);
+    await pm.auth().login(config.api.userEmail, config.api.userPassword);
   });
 
-  test("create, update and delete article", async ({ page }) => {
+  test("should create, update and delete an article", async ({ page }) => {
     const pm = new PageManager(page);
+
     await pm.navigateTo().newArticlePage();
     await pm
       .article()
       .createArticle(
-        updateArticleData.initialTitle,
-        updateArticleData.initialDescription,
-        updateArticleData.initialBody,
-        updateArticleData.initialTag,
+        articleData.initialTitle,
+        articleData.initialDescription,
+        articleData.initialBody,
+        articleData.initialTag,
       );
 
     await pm
       .article()
       .updateArticle(
-        updateArticleData.updatedTitle,
-        updateArticleData.updatedDescription,
-        updateArticleData.updatedBody,
-        updateArticleData.updatedTag,
+        articleData.updatedTitle,
+        articleData.updatedDescription,
+        articleData.updatedBody,
+        articleData.updatedTag,
       );
 
     await expect(
-      page.getByRole("heading", { name: updateArticleData.updatedTitle }),
+      page.getByRole("heading", { name: articleData.updatedTitle }),
     ).toBeVisible();
 
     await pm.article().deleteArticle();

@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "api-test": "playwright test --project=api-testing",
+    "api-test:smoke": "playwright test --project=api-testing-smoke",
     "ui-test": "playwright test --project=ui-testing",
     "ui-test:debug": "playwright test --project=ui-testing --debug",
     "ui-test:headless": "playwright test --project=ui-testing --headed=false",
     "ui-test:slow": "playwright test --project=ui-testing --slow-mo=500",
-    "ui-test:smoke": "playwright test --project=ui-testing-smoke",
     "ui-test:ui": "npx playwright test --ui",
     "ui-test:trace-on": "npx playwright test --trace on",
     "ui-test:debug-ui": "npx playwright test --debug",
-    "ui-test:codegen": "npx playwright codegen https://conduit.bondaracademy.com"
+    "ui-test:codegen": "npx playwright codegen https://conduit.bondaracademy.com",
+    "test:all": "playwright test",
+    "test:report": "playwright show-report"
   },
   "keywords": [],
   "author": "",
