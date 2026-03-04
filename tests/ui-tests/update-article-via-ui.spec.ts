@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
-import { PageManager } from "../../page-objects/pageManager";
-import { createToken } from "../api-tests/helpers/createToken";
+import { PageManager } from "../../page-objects/page-manager";
+import { createToken } from "../api-tests/helpers/create-token";
 import { RequestHandler } from "../api-tests/utils/request-handler";
 import { APILogger } from "../api-tests/utils/logger";
 import { config } from "../../config/test-config";

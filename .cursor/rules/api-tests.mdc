@@ -76,12 +76,12 @@ Custom matchers include Recent API Activity in failure messages — much easier 
 
 ## Request objects (POST / PUT payloads)
 
-Base payloads live in `request-objects/`. File naming: `[METHOD]-[endpoint].json` (e.g. `POST-article.json`, `PUT-user.json`).
+Base payloads live in `request-objects/`. File naming: `METHOD_resource.json` (e.g. `POST_article.json`, `POST_user.json`).
 
 **Always clone** before mutating — never use the raw import directly:
 
 ```ts
-import articleRequestPayload from '../../request-objects/POST-article.json'
+import articleRequestPayload from '../../request-objects/POST_article.json'
 
 const articleRequest = structuredClone(articleRequestPayload)
 articleRequest.article.title = 'Override if needed'

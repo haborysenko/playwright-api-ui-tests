@@ -1,5 +1,5 @@
-import articleRequestPayloads from "../../../request-objects/POST-article.json";
-import userRequestPayloads from "../../../request-objects/POST-user.json";
+import articleRequestPayloads from "../../../request-objects/POST_article.json";
+import userRequestPayloads from "../../../request-objects/POST_user.json";
 import { faker } from "@faker-js/faker";
 
 export function getNewRandomArticle() {

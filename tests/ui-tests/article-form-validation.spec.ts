@@ -1,7 +1,7 @@
 import { test } from "@playwright/test";
 import { faker } from "@faker-js/faker";
-import { PageManager } from "../../page-objects/pageManager";
-import { expectValidationError } from "./utils/uiExpect";
+import { PageManager } from "../../page-objects/page-manager";
+import { expectValidationError } from "./utils/ui-expect";
 import { config } from "../../config/test-config";
 
 test.describe("Article UI | form validation", () => {

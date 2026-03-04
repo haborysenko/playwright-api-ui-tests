@@ -1,7 +1,7 @@
 import { Page } from "@playwright/test";
-import { NavigationPage } from "./navigationPage";
-import { AuthPage } from "./authPage";
-import { ArticlePage } from "./articlePage";
+import { NavigationPage } from "./navigation-page";
+import { AuthPage } from "./auth-page";
+import { ArticlePage } from "./article-page";
 
 export class PageManager {
   private page: Page;

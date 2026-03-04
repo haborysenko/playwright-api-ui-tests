@@ -3,7 +3,7 @@ import { RequestHandler } from "./request-handler";
 import { APILogger } from "./logger";
 import { setCustomExpectLogger } from "./custom-expect";
 import { config } from "../../../config/test-config";
-import { createToken } from "../helpers/createToken";
+import { createToken } from "../helpers/create-token";
 
 export type TestOptions = {
   api: RequestHandler;

@@ -13,21 +13,21 @@ UI tests use a **three-layer structure**:
 | Layer | Location | Responsibility |
 |-------|----------|----------------|
 | **Spec** | `tests/ui-tests/*.spec.ts` | Test logic only; uses `PageManager`, never page objects directly |
-| **PageManager** | `page-objects/pageManager.ts` | Single entry point: exposes `navigateTo()`, `auth()`, `article()` so specs stay DRY |
-| **Page objects** | `page-objects/navigationPage.ts`, `authPage.ts`, `articlePage.ts` | One class per area; extend `HelperBase`; methods = user actions, locators KISS in methods |
-| **HelperBase** | `page-objects/helperBase.ts` | Base class: holds `page`, shared helpers (e.g. `waitForNumberOfSeconds`) |
+| **PageManager** | `page-objects/page-manager.ts` | Single entry point: exposes `navigateTo()`, `auth()`, `article()` so specs stay DRY |
+| **Page objects** | `page-objects/navigation-page.ts`, `auth-page.ts`, `article-page.ts` | One class per area; extend `HelperBase`; methods = user actions, locators KISS in methods |
+| **HelperBase** | `page-objects/helper-base.ts` | Base class: holds `page`, shared helpers (e.g. `waitForNumberOfSeconds`) |
 
 **Structure:**
 
 ```
 page-objects/
-  helperBase.ts      — base class (page, shared helpers)
-  pageManager.ts     — facade: new PageManager(page) → navigateTo(), auth(), article()
-  navigationPage.ts — extends HelperBase: gotoHome(), loginPage(), signUpPage(), newArticlePage()
-  authPage.ts       — extends HelperBase: login()
-  articlePage.ts    — extends HelperBase: createNewArticle(), deleteArticle()
+  helper-base.ts      — base class (page, shared helpers)
+  page-manager.ts     — facade: new PageManager(page) → navigateTo(), auth(), article()
+  navigation-page.ts  — extends HelperBase: gotoHome(), loginPage(), signUpPage(), newArticlePage()
+  auth-page.ts        — extends HelperBase: login()
+  article-page.ts     — extends HelperBase: createArticle(), updateArticle(), deleteArticle()
 tests/ui-tests/
-  smokeUItest.spec.ts, *.spec.ts — import { PageManager }; use pm.navigateTo().gotoHome(), pm.auth().login(), etc.
+  article-form-validation.spec.ts, *.spec.ts — import { PageManager }; use pm.navigateTo().gotoHome(), pm.auth().login(), etc.
 ```
 
 **Spec usage:** One instance of `PageManager(page)` per test; access page objects only via `pageManager.navigateTo()`, `pageManager.auth()`, `pageManager.article()`.
@@ -42,7 +42,7 @@ Locators **KISS in methods** (no class-level `Locator` properties). Extend `Help
 
 ```ts
 import { Page } from "@playwright/test";
-import { HelperBase } from "./helperBase";
+import { HelperBase } from "./helper-base";
 
 export class NavigationPage extends HelperBase {
   constructor(page: Page) {
@@ -72,7 +72,7 @@ Specs use **PageManager** only; no direct imports of page objects.
 
 ```ts
 import { test, expect } from "@playwright/test";
-import { PageManager } from "../../page-objects/pageManager";
+import { PageManager } from "../../page-objects/page-manager";
 
 test("user can sign in and create article", async ({ page }) => {
   const pm = new PageManager(page);
@@ -88,16 +88,14 @@ test("user can sign in and create article", async ({ page }) => {
 For tests that need data already in the system (e.g. an article to view), use Playwright's `request` fixture in `beforeEach` or `test.beforeAll` to set up state via the API — do not drive the UI just to create prerequisites.
 
 ```ts
-test.beforeEach(async ({ request }) => {
-  // create article via API so UI test can find it
-  await request.post("https://conduit-api.bondaracademy.com/api/articles", {
-    headers: { Authorization: authToken },
-    data: { article: { title: "...", description: "...", body: "..." } },
-  });
+test.beforeEach("create article via API", async ({ request }) => {
+  const api = new RequestHandler(request, config.api.baseUrl, new APILogger(), authToken);
+  const response = await api.path("/articles").body({ article: { ... } }).postRequest(201);
+  articleSlug = response.article.slug;
 });
 ```
 
-Or reuse `createToken` and `RequestHandler` directly for full framework consistency.
+Always use `RequestHandler` — never call `request.post/delete` directly in specs.
 
 ## Locator strategy — preference order
 

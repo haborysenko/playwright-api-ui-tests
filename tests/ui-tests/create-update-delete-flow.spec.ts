@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
-import { PageManager } from "../../page-objects/pageManager";
+import { PageManager } from "../../page-objects/page-manager";
 import { config } from "../../config/test-config";
 
 test.describe("Article UI | create, update and delete flow", () => {

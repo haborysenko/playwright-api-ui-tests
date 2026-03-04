@@ -9,32 +9,53 @@ alwaysApply: true
 
 A Playwright + TypeScript test framework targeting the Conduit RealWorld API and UI at `https://conduit.bondaracademy.com`. The codebase is split into an API layer (with a custom `RequestHandler`, fixtures, logger, schema validation, custom matchers) and a UI layer (Playwright browser tests, Page Object Model).
 
+## Naming conventions
+
+| What | Convention | Examples |
+|---|---|---|
+| **Files and folders** | kebab-case | `smoke-test.spec.ts`, `page-manager.ts`, `create-token.ts`, `request-objects/` |
+| **Classes and types** | PascalCase | `class ArticlePage {}`, `type UserRole = ...` |
+| **Functions, variables, methods** | camelCase | `async function createToken()`, `const authToken = ...` |
+| **Test IDs / selectors** | kebab-case | `data-testid="submit-button"` |
+| **JSON schema files** | `METHOD_resource_schema.json` | `GET_article_schema.json`, `POST_user_negative_schema.json` |
+| **JSON request object files** | `METHOD_resource.json` | `POST_article.json`, `POST_user.json` |
+
 ## Project structure
 
 ```
-config/test-config.ts          — central config; URLs + env-based credentials
-request-objects/               — base JSON payloads (POST-article.json, POST-user.json)
-response-schemas/              — Ajv JSON schemas organised by resource
+config/
+  test-config.ts              — central config: URLs + credentials
+request-objects/
+  POST_article.json           — base payload for article creation
+  POST_user.json              — base payload for user registration
+response-schemas/
+  articles/                   — Ajv JSON schemas for article responses
+  users/                      — Ajv JSON schemas for user responses
 page-objects/
-  helperBase.ts                — base class: page property + shared helpers
-  pageManager.ts               — facade: new PageManager(page) → navigateTo(), auth(), article()
-  navigationPage.ts            — extends HelperBase: navigation actions
-  authPage.ts                  — extends HelperBase: login
-  articlePage.ts               — extends HelperBase: article create/update/delete/validation
+  helper-base.ts              — base class: page property + shared helpers
+  page-manager.ts             — facade: new PageManager(page) → navigateTo(), auth(), article()
+  navigation-page.ts          — extends HelperBase: navigation actions
+  auth-page.ts                — extends HelperBase: login
+  article-page.ts             — extends HelperBase: article create/update/delete/validation
 tests/api-tests/
   utils/
-    request-handler.ts         — fluent HTTP client (THE API layer core)
-    fixtures.ts                — Playwright fixtures: api, config, authToken, attachApiLogs
-    logger.ts                  — APILogger: captures request/response per test
-    custom-expect.ts           — custom matchers: shouldBe, shouldEqual, shouldMatchSchema
-    schema-validator.ts        — Ajv validator + genson-js schema generator
-    data-generator.ts          — Faker-powered generators: getNewRandomArticle, getNewRandomUser
-  helpers/createToken.ts       — standalone login helper → "Token <jwt>"
-  *.spec.ts                    — test files
+    request-handler.ts        — fluent HTTP client (THE API layer core)
+    fixtures.ts               — Playwright fixtures: api, config, authToken, attachApiLogs
+    logger.ts                 — APILogger: captures request/response per test
+    custom-expect.ts          — custom matchers: shouldBe, shouldEqual, shouldMatchSchema
+    schema-validator.ts       — Ajv validator + genson-js schema generator
+    data-generator.ts         — Faker-powered generators: getNewRandomArticle, getNewRandomUser
+  helpers/
+    create-token.ts           — standalone login helper → "Token <jwt>"
+  smoke-test.spec.ts          — CRUD operations smoke test
+  negative-tests.spec.ts      — data-driven negative/validation cases
 tests/ui-tests/
-  utils/uiExpect.ts            — UI assertion helpers
-  *.spec.ts                    — UI test files
-playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-testing
+  utils/
+    ui-expect.ts              — UI assertion helpers
+  article-form-validation.spec.ts   — form validation UI tests
+  create-update-delete-flow.spec.ts — full UI CRUD flow
+  update-article-via-ui.spec.ts     — hybrid: API setup + UI interaction
+playwright.config.ts          — projects: api-testing, api-testing-smoke, ui-testing
 ```
 
 ## Hard rules — never break these
@@ -42,16 +63,16 @@ playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-
 - **Never bypass `RequestHandler`.** All API calls go through it. Do not use `request.get/post/...` directly in specs or fixtures.
 - **Never import `test` from `@playwright/test` in API spec files.** Always import from `./utils/fixtures` to get the custom `api`, `config`, and `authToken` fixtures.
 - **Never import `expect` from `@playwright/test` in API spec files.** Always import from `./utils/custom-expect` to get API-log-enriched matchers.
-- **Never hardcode credentials or base URLs** in spec files. Use the `config` fixture or `config/test-config.ts`.
+- **Never hardcode credentials or base URLs** in spec files. Use `config/test-config.ts`.
 - **Never mutate imported request objects directly.** Always use `structuredClone` or `getNewRandomArticle()` / `getNewRandomUser()` from `data-generator.ts`.
 
 ## Adding new files
 
 | What | Where |
-|------|-------|
+|---|---|
 | New API spec | `tests/api-tests/` |
 | New UI spec | `tests/ui-tests/` |
-| New page object | `page-objects/<PageName>.ts` |
+| New page object | `page-objects/` |
 | New request payload | `request-objects/` |
 | New response schema | `response-schemas/<resource>/` |
 | New data generator | `tests/api-tests/utils/data-generator.ts` |
@@ -59,4 +80,4 @@ playwright.config.ts           — projects: api-testing, api-testing-smoke, ui-
 
 ## Config and environments
 
-`TEST_ENV` env var selects `dev` / `qa` / `prod`. Credentials come from `.env` (never committed). The `config` fixture injects the resolved config into any test — no direct imports needed in specs.
+Credentials and URLs live in `config/test-config.ts`. The `config` fixture injects them into any API test — no direct imports needed in API specs. UI specs import `config` directly from `config/test-config.ts`.
