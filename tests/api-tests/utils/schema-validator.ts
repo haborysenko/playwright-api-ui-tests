@@ -4,7 +4,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import { createSchema } from "genson-js";
 
-const SCHEMA_BASE_PATH = "./response-schemas";
+const SCHEMA_BASE_PATH = "./support/api/response-schemas";
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
 

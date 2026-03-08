@@ -1,7 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./utils/fixtures";
 import { faker } from "@faker-js/faker";
-import { PageManager } from "../../page-objects/page-manager";
-import { config } from "../../config/test-config";
 
 test.describe("Article UI | full CRUD flow (create, update, delete)", () => {
   const articleData = {
@@ -15,16 +13,13 @@ test.describe("Article UI | full CRUD flow (create, update, delete)", () => {
     updatedTag: faker.lorem.word(),
   };
 
-  test.beforeEach(async ({ page }) => {
-    const pm = new PageManager(page);
+  test.beforeEach(async ({ pm, config }) => {
     await pm.navigateTo().gotoHome();
     await pm.navigateTo().loginPage();
     await pm.auth().login(config.api.userEmail, config.api.userPassword);
   });
 
-  test("should create article, then update it, then delete it via UI", async ({ page }) => {
-    const pm = new PageManager(page);
-
+  test("should create article, then update it, then delete it via UI", async ({ pm, page }) => {
     await pm.navigateTo().newArticlePage();
     await pm
       .article()
