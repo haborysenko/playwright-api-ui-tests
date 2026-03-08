@@ -13,7 +13,7 @@ A Playwright + TypeScript test framework targeting the Conduit RealWorld API and
 
 | What | Convention | Examples |
 |---|---|---|
-| **Files and folders** | kebab-case | `article-crud.spec.ts`, `page-manager.ts`, `create-token.ts`, `request-objects/` |
+| **Files and folders** | kebab-case | `articles-list-and-crud.spec.ts`, `page-manager.ts`, `create-token.ts`, `request-objects/` |
 | **Classes and types** | PascalCase | `class ArticlePage {}`, `type UserRole = ...` |
 | **Functions, variables, methods** | camelCase | `async function createToken()`, `const authToken = ...` |
 | **Test IDs / selectors** | kebab-case | `data-testid="submit-button"` |
@@ -49,8 +49,8 @@ tests/api-tests/
     data-generator.ts         — Faker-powered generators: getNewRandomArticle, getNewRandomUser
   helpers/
     create-token.ts           — standalone login helper → "Token <jwt>"
-  article-crud.spec.ts                  — article CRUD operations
-  user-registration-negative.spec.ts    — registration negative cases (invalid username → 422)
+  articles-list-and-crud.spec.ts        — GET list + full CRUD (create, read, update, delete)
+  users-registration-username-validation.spec.ts — POST /users invalid username → 422
 tests/ui-tests/
   utils/
     ui-expect.ts              — UI assertion helpers
@@ -67,6 +67,15 @@ playwright.config.ts          — projects: api-testing, api-testing-smoke, ui-t
 - **Never import `expect` from `@playwright/test` in API spec files.** Always import from `./utils/custom-expect` to get API-log-enriched matchers.
 - **Never hardcode credentials or base URLs** in spec files. Use `config/test-config.ts`.
 - **Never mutate imported request objects directly.** Always use `structuredClone` or `getNewRandomArticle()` / `getNewRandomUser()` from `data-generator.ts`.
+
+## API spec naming
+
+Use **resource-scenario** in kebab-case so the file name describes what is tested:
+
+- **Resource**: endpoint area, plural when it matches the API path (`articles`, `users`).
+- **Scenario**: what the spec does — e.g. `list-and-crud`, `registration-username-validation-422`.
+
+Examples: `articles-list-and-crud.spec.ts`, `users-registration-username-validation-422.spec.ts`.
 
 ## Adding new files
 

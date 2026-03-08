@@ -19,12 +19,12 @@ Tests run automatically on every push and pull request via GitHub Actions (`.git
 
 Add these secrets to your GitHub repo under **Settings → Secrets and variables → Actions**:
 
-| Secret | Description |
-|---|---|
-| `API_BASE_URL` | `https://conduit-api.bondaracademy.com/api` |
-| `UI_BASE_URL` | `https://conduit.bondaracademy.com` |
-| `USER_EMAIL` | Test account email |
-| `USER_PASSWORD` | Test account password |
+| Secret          | Description                                 |
+| --------------- | ------------------------------------------- |
+| `API_BASE_URL`  | `https://conduit-api.bondaracademy.com/api` |
+| `UI_BASE_URL`   | `https://conduit.bondaracademy.com`         |
+| `USER_EMAIL`    | Test account email                          |
+| `USER_PASSWORD` | Test account password                       |
 
 ---
 
@@ -44,8 +44,8 @@ tests/
   api-tests/
     utils/                       — RequestHandler, fixtures, logger, custom-expect, schema-validator, data-generator
     helpers/create-token.ts      — standalone login helper → "Token <jwt>"
-    article-crud.spec.ts         — article CRUD
-    user-registration-negative.spec.ts — registration negative cases (invalid username → 422)
+    articles-list-and-crud.spec.ts — GET list + full CRUD (create, read, update, delete)
+    users-registration-username-validation.spec.ts — POST /users invalid username → 422
   ui-tests/
     utils/
       fixtures.ts                — pm fixture (PageManager)
@@ -60,13 +60,13 @@ playwright.config.ts             — projects: api-testing, ui-testing
 
 ## Running tests
 
-| Command | What runs |
-|---|---|
-| `npm run api-test` | All API tests |
-| `npm run ui-test` | All UI tests (headed) |
-| `npm run ui-test:headless` | UI tests headless |
-| `npm run ui-test:debug` | UI with Playwright Inspector |
-| `npm run test:all` | Everything |
+| Command                    | What runs                    |
+| -------------------------- | ---------------------------- |
+| `npm run api-test`         | All API tests                |
+| `npm run ui-test`          | All UI tests (headed)        |
+| `npm run ui-test:headless` | UI tests headless            |
+| `npm run ui-test:debug`    | UI with Playwright Inspector |
+| `npm run test:all`         | Everything                   |
 
 ---
 
@@ -75,9 +75,12 @@ playwright.config.ts             — projects: api-testing, ui-testing
 ### RequestHandler — fluent HTTP client
 
 ```ts
-const articles = await api.path('/articles').params({ limit: 10 }).getRequest(200)
-const created  = await api.path('/articles').body(payload).postRequest(201)
-await api.path(`/articles/${slug}`).deleteRequest(204)
+const articles = await api
+  .path("/articles")
+  .params({ limit: 10 })
+  .getRequest(200);
+const created = await api.path("/articles").body(payload).postRequest(201);
+await api.path(`/articles/${slug}`).deleteRequest(204);
 ```
 
 Each call auto-injects auth, logs request/response, asserts status, and wraps in `test.step()`.
@@ -87,24 +90,37 @@ Each call auto-injects auth, logs request/response, asserts status, and wraps in
 Import `expect` from `./utils/custom-expect`. All matchers attach the last API call to failure messages.
 
 ```ts
-await expect(response).shouldMatchSchema('articles', 'GET_article_schema', false)
-expect(response.title).shouldBe('expected value')
-expect(response.count).shouldBeLessThanOrEqual(10)
+await expect(response).shouldMatchSchema(
+  "articles",
+  "GET_article_schema",
+  false,
+);
+expect(response.title).shouldBe("expected value");
+expect(response.count).shouldBeLessThanOrEqual(10);
 ```
 
 ### Schema validation
 
 Run once with `true` to generate a schema file, then switch back to `false`:
+
 ```ts
-await expect(response).shouldMatchSchema('articles', 'GET_article_schema', true)  // generates
-await expect(response).shouldMatchSchema('articles', 'GET_article_schema', false) // validates
+await expect(response).shouldMatchSchema(
+  "articles",
+  "GET_article_schema",
+  true,
+); // generates
+await expect(response).shouldMatchSchema(
+  "articles",
+  "GET_article_schema",
+  false,
+); // validates
 ```
 
 ### Data generators
 
 ```ts
-const article = getNewRandomArticle() // cloned from POST_article.json + Faker fields
-const user    = getNewRandomUser()    // cloned from POST_user.json + Faker fields
+const article = getNewRandomArticle(); // cloned from POST_article.json + Faker fields
+const user = getNewRandomUser(); // cloned from POST_user.json + Faker fields
 ```
 
 ### Page Object Model
@@ -121,9 +137,9 @@ All UI specs use `PageManager` only — never import page objects directly.
 
 ## Naming conventions
 
-| What | Convention |
-|---|---|
-| Files and folders | kebab-case |
-| Classes and types | PascalCase |
-| Functions, variables, methods | camelCase |
-| JSON schema files | `METHOD_resource_schema.json` |
+| What                          | Convention                    |
+| ----------------------------- | ----------------------------- |
+| Files and folders             | kebab-case                    |
+| Classes and types             | PascalCase                    |
+| Functions, variables, methods | camelCase                     |
+| JSON schema files             | `METHOD_resource_schema.json` |
