@@ -6,42 +6,50 @@ export class ArticlePage extends HelperBase {
     super(page);
   }
 
+  // Locator getters — used both for filling and for value assertions
+  titleInput() {
+    return this.page.getByRole("textbox", { name: "Article Title" });
+  }
+
+  descriptionInput() {
+    return this.page.getByRole("textbox", { name: "What's this article about?" });
+  }
+
+  bodyInput() {
+    return this.page.getByRole("textbox", { name: "Write your article (in" });
+  }
+
+  validationErrors() {
+    return this.page.locator("app-list-errors");
+  }
+
   private async fillTagIfProvided(tag?: string) {
     if (tag !== undefined) {
-      await this.fillTag(tag);
+      await this.page.getByRole("textbox", { name: "Enter tags" }).fill(tag);
     }
   }
 
   async fillTitle(title: string) {
-    await this.page
-      .getByRole("textbox", { name: "Article Title" })
-      .fill(title);
+    await this.titleInput().fill(title);
   }
 
   async fillDescription(description: string) {
-    await this.page
-      .getByRole("textbox", { name: "What's this article about?" })
-      .fill(description);
+    await this.descriptionInput().fill(description);
   }
 
   async fillBody(body: string) {
-    await this.page
-      .getByRole("textbox", { name: "Write your article (in" })
-      .fill(body);
-  }
-
-  async fillTag(tag: string) {
-    await this.page
-      .getByRole("textbox", { name: "Enter tags" })
-      .fill(tag);
+    await this.bodyInput().fill(body);
   }
 
   async submitArticle() {
     await this.page.getByRole("button", { name: "Publish Article" }).click();
   }
 
-  validationErrors() {
-    return this.page.locator("app-list-errors");
+  async openEditForm() {
+    await this.page
+      .locator(".banner")
+      .getByRole("link", { name: "Edit Article" })
+      .click();
   }
 
   async createArticle(
@@ -57,27 +65,24 @@ export class ArticlePage extends HelperBase {
     await this.submitArticle();
   }
 
-  async deleteArticle() {
-    await this.page
-      .locator(".banner")
-      .getByRole("button", { name: "Delete Article" })
-      .click();
-  }
-
   async updateArticle(
     title: string,
     description: string,
     body: string,
     tag?: string,
   ) {
-    await this.page
-      .locator(".banner")
-      .getByRole("link", { name: "Edit Article" })
-      .click();
+    await this.openEditForm();
     await this.fillTitle(title);
     await this.fillDescription(description);
     await this.fillBody(body);
     await this.fillTagIfProvided(tag);
     await this.submitArticle();
+  }
+
+  async deleteArticle() {
+    await this.page
+      .locator(".banner")
+      .getByRole("button", { name: "Delete Article" })
+      .click();
   }
 }
