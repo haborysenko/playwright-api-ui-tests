@@ -1,4 +1,3 @@
-import { expect } from "@playwright/test";
 import { test as baseApiTest } from "../api-tests/utils/fixtures";
 import { faker } from "@faker-js/faker";
 import { PageManager } from "../../support/ui/page-objects/page-manager";
@@ -48,14 +47,10 @@ test.describe("Article UI | update article description (API setup and teardown)"
     await api.path(`/articles/${articleSlug}`).deleteRequest(204);
   });
 
-  test("should update article description via UI when article was created via API", async ({
-    pm,
-  }) => {
-    await pm.article().updateArticle(null, updatedDescription);
+  test("should update article description via UI when article was created via API", async ({ pm }) => {
+    await pm.article().updateArticle({ description: updatedDescription });
 
     await pm.article().openEditForm();
-    await expect(pm.article().descriptionInputLocator()).toHaveValue(
-      updatedDescription,
-    );
+    await pm.article().expectFormValues({ description: updatedDescription });
   });
 });

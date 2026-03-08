@@ -19,27 +19,27 @@ test.describe("Article UI | new article form required-field validation", () => {
     await pm.navigateTo().newArticlePage();
   });
 
-  test("should show validation error when title is empty", async ({ pm }) => {
+  test("should show validation error when title is empty", async ({ pm, page }) => {
     await pm.article().fillDescription(validDescription);
     await pm.article().fillBody(validBody);
     await pm.article().submitArticle();
 
-    await expectValidationError(pm.article().validationErrors(), titleRequiredError);
+    await expectValidationError(page, titleRequiredError);
   });
 
-  test("should show validation error when description is empty", async ({ pm }) => {
+  test("should show validation error when description is empty", async ({ pm, page }) => {
     await pm.article().fillTitle(validTitle);
     await pm.article().fillBody(validBody);
     await pm.article().submitArticle();
 
-    await expectValidationError(pm.article().validationErrors(), descriptionRequiredError);
+    await expectValidationError(page, descriptionRequiredError);
   });
 
-  test("should show validation error when body is empty", async ({ pm }) => {
+  test("should show validation error when body is empty", async ({ pm, page }) => {
     await pm.article().fillTitle(validTitle);
     await pm.article().fillDescription(validDescription);
     await pm.article().submitArticle();
 
-    await expectValidationError(pm.article().validationErrors(), bodyRequiredError);
+    await expectValidationError(page, bodyRequiredError);
   });
 });
