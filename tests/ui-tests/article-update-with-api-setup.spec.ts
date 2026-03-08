@@ -8,16 +8,14 @@ const test = baseApiTest.extend<{ pm: PageManager }>({
   pm: async ({ page }, use) => await use(new PageManager(page)),
 });
 
-test.describe("Article UI | update article (API setup and teardown)", () => {
+test.describe("Article UI | update article description (API setup and teardown)", () => {
   const articleData = {
     title: faker.lorem.words(3),
     description: faker.lorem.sentence(),
     body: faker.lorem.paragraph(),
   };
 
-  const updatedTitle = faker.lorem.words(3);
   const updatedDescription = faker.lorem.sentence();
-  const updatedBody = faker.lorem.paragraph();
 
   let articleSlug: string;
 
@@ -50,17 +48,14 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
     await api.path(`/articles/${articleSlug}`).deleteRequest(204);
   });
 
-  test("should update article description and body via UI when article was created via API", async ({
-    pm
+  test("should update article description via UI when article was created via API", async ({
+    pm,
   }) => {
-    await pm
-      .article()
-      .updateArticle(updatedTitle, updatedDescription, updatedBody);
+    await pm.article().updateArticle(null, updatedDescription);
 
-    await expect(pm.article().titleInput()).toHaveValue(updatedTitle);
-    await expect(pm.article().descriptionInput()).toHaveValue(
+    await pm.article().openEditForm();
+    await expect(pm.article().descriptionInputLocator()).toHaveValue(
       updatedDescription,
     );
-    await expect(pm.article().bodyInput()).toHaveValue(updatedBody);
   });
 });

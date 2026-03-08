@@ -1,4 +1,4 @@
-import { Page } from "@playwright/test";
+import { Locator, Page } from "@playwright/test";
 import { HelperBase } from "./helper-base";
 
 export class ArticlePage extends HelperBase {
@@ -6,17 +6,9 @@ export class ArticlePage extends HelperBase {
     super(page);
   }
 
-  // Locator getters — used both for filling and for value assertions
-  titleInput() {
-    return this.page.getByRole("textbox", { name: "Article Title" });
-  }
-
-  descriptionInput() {
+  /** Description input locator for assertions (e.g. expect(...).toHaveValue()). */
+  descriptionInputLocator(): Locator {
     return this.page.getByRole("textbox", { name: "What's this article about?" });
-  }
-
-  bodyInput() {
-    return this.page.getByRole("textbox", { name: "Write your article (in" });
   }
 
   validationErrors() {
@@ -30,15 +22,19 @@ export class ArticlePage extends HelperBase {
   }
 
   async fillTitle(title: string) {
-    await this.titleInput().fill(title);
+    await this.page.getByRole("textbox", { name: "Article Title" }).fill(title);
   }
 
   async fillDescription(description: string) {
-    await this.descriptionInput().fill(description);
+    await this.page
+      .getByRole("textbox", { name: "What's this article about?" })
+      .fill(description);
   }
 
   async fillBody(body: string) {
-    await this.bodyInput().fill(body);
+    await this.page
+      .getByRole("textbox", { name: "Write your article (in" })
+      .fill(body);
   }
 
   async submitArticle() {
@@ -65,17 +61,18 @@ export class ArticlePage extends HelperBase {
     await this.submitArticle();
   }
 
+  /** Only fills and submits fields that are provided; pass null to leave a field unchanged. */
   async updateArticle(
-    title: string,
-    description: string,
-    body: string,
-    tag?: string,
+    title?: string | null,
+    description?: string | null,
+    body?: string | null,
+    tag?: string | null,
   ) {
     await this.openEditForm();
-    await this.fillTitle(title);
-    await this.fillDescription(description);
-    await this.fillBody(body);
-    await this.fillTagIfProvided(tag);
+    if (title != null) await this.fillTitle(title);
+    if (description != null) await this.fillDescription(description);
+    if (body != null) await this.fillBody(body);
+    if (tag != null) await this.fillTagIfProvided(tag);
     await this.submitArticle();
   }
 
