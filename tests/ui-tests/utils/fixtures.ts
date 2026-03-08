@@ -1,11 +1,7 @@
-import { test as apiTest } from "../../api-tests/utils/fixtures";
+import { test as base } from "@playwright/test";
 import { PageManager } from "../../../support/ui/page-objects/page-manager";
 
-type UiFixtures = {
-  pm: PageManager;
-};
-
-export const test = apiTest.extend<UiFixtures>({
+export const test = base.extend<{ pm: PageManager }>({
   pm: async ({ page }, use) => {
     await use(new PageManager(page));
   },

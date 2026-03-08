@@ -1,5 +1,6 @@
 import { test, expect } from "./utils/fixtures";
 import { faker } from "@faker-js/faker";
+import { config } from "../../config/test-config";
 
 test.describe("Article UI | full CRUD flow (create, update, delete)", () => {
   const articleData = {
@@ -13,7 +14,7 @@ test.describe("Article UI | full CRUD flow (create, update, delete)", () => {
     updatedTag: faker.lorem.word(),
   };
 
-  test.beforeEach(async ({ pm, config }) => {
+  test.beforeEach(async ({ pm }) => {
     await pm.navigateTo().gotoHome();
     await pm.navigateTo().loginPage();
     await pm.auth().login(config.api.userEmail, config.api.userPassword);

@@ -7,31 +7,53 @@ Playwright + TypeScript test framework targeting [Conduit](https://conduit.bonda
 ## Quick start
 
 ```bash
+cp .env.example .env   # fill in your credentials
 npm install
 npx playwright test        # run all tests
 npx playwright show-report # open HTML report
 ```
+
+## CI
+
+Tests run automatically on every push and pull request via GitHub Actions (`.github/workflows/playwright.yml`). API and UI tests run as separate parallel jobs.
+
+Add these secrets to your GitHub repo under **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|---|---|
+| `API_BASE_URL` | `https://conduit-api.bondaracademy.com/api` |
+| `UI_BASE_URL` | `https://conduit.bondaracademy.com` |
+| `USER_EMAIL` | Test account email |
+| `USER_PASSWORD` | Test account password |
 
 ---
 
 ## Project structure
 
 ```
-config/test-config.ts            — URLs and credentials (single source of truth)
-docs/api-endpoints.md            — centralized API endpoint reference (used in tests + link to full spec)
-request-objects/                 — base JSON payloads (POST_article.json, POST_user.json)
-response-schemas/                — Ajv JSON schemas by resource
-page-objects/                    — Page Object Model: PageManager + page classes
-tests/api-tests/
-  utils/                         — RequestHandler, fixtures, logger, custom-expect, schema-validator, data-generator
-  helpers/create-token.ts        — standalone login helper → "Token <jwt>"
-  article-crud.spec.ts                 — article CRUD
-  user-registration-negative.spec.ts   — registration negative cases (invalid username → 422)
-tests/ui-tests/
-  article-form-validation.spec.ts       — form validation (required fields)
-  article-crud-flow.spec.ts            — full CRUD via UI
-  article-update-with-api-setup.spec.ts — update via UI (article created via API)
-playwright.config.ts             — projects: api-testing, api-testing-smoke, ui-testing
+config/
+  test-config.ts                 — URLs and credentials loaded from .env
+.env.example                     — required environment variables (copy to .env and fill in)
+support/
+  ui/
+    page-objects/                — Page Object Model: PageManager + page classes
+  api/
+    request-objects/             — base JSON payloads (POST_article.json, POST_user.json)
+    response-schemas/            — Ajv JSON schemas by resource
+tests/
+  api-tests/
+    utils/                       — RequestHandler, fixtures, logger, custom-expect, schema-validator, data-generator
+    helpers/create-token.ts      — standalone login helper → "Token <jwt>"
+    article-crud.spec.ts         — article CRUD
+    user-registration-negative.spec.ts — registration negative cases (invalid username → 422)
+  ui-tests/
+    utils/
+      fixtures.ts                — pm fixture (PageManager)
+      ui-expect.ts               — UI assertion helpers
+    article-form-validation.spec.ts       — form validation (required fields)
+    article-crud-flow.spec.ts            — full CRUD via UI
+    article-update-with-api-setup.spec.ts — update via UI (article created via API)
+playwright.config.ts             — projects: api-testing, ui-testing
 ```
 
 ---

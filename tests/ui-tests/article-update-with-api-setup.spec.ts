@@ -1,5 +1,12 @@
-import { test, expect } from "./utils/fixtures";
+import { expect } from "@playwright/test";
+import { test as baseApiTest } from "../api-tests/utils/fixtures";
 import { faker } from "@faker-js/faker";
+import { PageManager } from "../../support/ui/page-objects/page-manager";
+
+// This spec combines API infrastructure (auth token, RequestHandler) with UI page interactions
+const test = baseApiTest.extend<{ pm: PageManager }>({
+  pm: async ({ page }, use) => await use(new PageManager(page)),
+});
 
 test.describe("Article UI | update article (API setup and teardown)", () => {
   const articleData = {
