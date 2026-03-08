@@ -43,9 +43,9 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
     await page.goto(`/article/${articleSlug}`);
   });
 
-  test.afterEach("delete article via API", async ({ api }) => {
-    await api.path(`/articles/${articleSlug}`).deleteRequest(204);
-  });
+  // test.afterEach("delete article via API", async ({ api }) => {
+  //   await api.path(`/articles/${articleSlug}`).deleteRequest(204);
+  // });
 
   test("should update article description and body via UI when article was created via API", async ({ pm }) => {
     // Update only description/body/tag so slug stays the same and afterEach delete works
