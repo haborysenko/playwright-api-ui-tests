@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { expectValidationError } from "./utils/ui-expect";
 import { config } from "../../config/test-config";
 
-test.describe("Article UI | new article form required-field validation", () => {
+test.describe("Article UI | create a new article form required-field validation", () => {
   const validTitle = faker.lorem.words(3);
   const validDescription = faker.lorem.sentence();
   const validBody = faker.lorem.paragraph();
@@ -19,7 +19,10 @@ test.describe("Article UI | new article form required-field validation", () => {
     await pm.navigateTo().newArticlePage();
   });
 
-  test("should show validation error when title is empty", async ({ pm, page }) => {
+  test("should show validation error when title is empty", async ({
+    pm,
+    page,
+  }) => {
     await pm.article().fillDescription(validDescription);
     await pm.article().fillBody(validBody);
     await pm.article().submitArticle();
@@ -27,7 +30,10 @@ test.describe("Article UI | new article form required-field validation", () => {
     await expectValidationError(page, titleRequiredError);
   });
 
-  test("should show validation error when description is empty", async ({ pm, page }) => {
+  test("should show validation error when description is empty", async ({
+    pm,
+    page,
+  }) => {
     await pm.article().fillTitle(validTitle);
     await pm.article().fillBody(validBody);
     await pm.article().submitArticle();
@@ -35,7 +41,10 @@ test.describe("Article UI | new article form required-field validation", () => {
     await expectValidationError(page, descriptionRequiredError);
   });
 
-  test("should show validation error when body is empty", async ({ pm, page }) => {
+  test("should show validation error when body is empty", async ({
+    pm,
+    page,
+  }) => {
     await pm.article().fillTitle(validTitle);
     await pm.article().fillDescription(validDescription);
     await pm.article().submitArticle();
