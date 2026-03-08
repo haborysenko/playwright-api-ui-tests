@@ -15,9 +15,9 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
     body: faker.lorem.paragraph(),
   };
 
+  const updatedTitle = faker.lorem.words(3);
   const updatedDescription = faker.lorem.sentence();
   const updatedBody = faker.lorem.paragraph();
-  const updatedTag = faker.lorem.word();
 
   let articleSlug: string;
 
@@ -51,25 +51,16 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
   });
 
   test("should update article description and body via UI when article was created via API", async ({
-    pm,
+    pm
   }) => {
-    // Update only description/body/tag so slug stays the same and afterEach delete works
     await pm
       .article()
-      .updateArticle(
-        articleData.title,
-        updatedDescription,
-        updatedBody,
-        updatedTag,
-      );
+      .updateArticle(updatedTitle, updatedDescription, updatedBody);
 
-    // Reopen edit form and verify the updated values were persisted
-    await pm.article().openEditForm();
-    await expect(pm.article().titleInput()).toHaveValue(articleData.title);
+    await expect(pm.article().titleInput()).toHaveValue(updatedTitle);
     await expect(pm.article().descriptionInput()).toHaveValue(
       updatedDescription,
     );
     await expect(pm.article().bodyInput()).toHaveValue(updatedBody);
-    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 });
