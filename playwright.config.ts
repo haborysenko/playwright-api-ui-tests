@@ -33,7 +33,7 @@ export default defineConfig({
       testDir: "./tests/ui-tests",
       use: {
         defaultBrowserType: "chromium",
-        headless: false, // browser visible when running UI tests (override with --headed=false for headless)
+        headless: !!process.env.CI, // headed locally, headless in CI
       },
     },
   ],
