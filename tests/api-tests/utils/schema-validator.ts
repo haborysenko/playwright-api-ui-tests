@@ -23,7 +23,6 @@ export async function validateSchema(
 
   const valid = validate(responseBody);
   if (!valid) {
-    const errors = validate.errors ?? [];
     throw new Error(
       `Schema validation ${fileName}_schema.json failed:\n` +
         `${JSON.stringify(validate.errors, null, 4)}\n\n` +

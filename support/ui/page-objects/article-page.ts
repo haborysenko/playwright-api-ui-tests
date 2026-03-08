@@ -27,11 +27,7 @@ export class ArticlePage extends HelperBase {
   }
 
   async submitArticle() {
-    const button = this.page.getByRole("button", { name: "Publish Article" });
-    await expect(button).toBeVisible();
-    await expect(button).toBeEnabled();
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
+    await this.page.getByRole("button", { name: "Publish Article" }).click();
   }
 
   async openEditForm() {

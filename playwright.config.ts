@@ -7,9 +7,9 @@ import { config } from "./config/test-config";
 export default defineConfig({
   testDir: "./tests",
   expect: { timeout: 10_000 }, // assertion retry timeout (default 5s)
-  fullyParallel: false, // tests withing the spec file executed sequentially in order they are in file
-  retries: process.env.CI ? 2 : 0, // ci run with 2 retries, local run with 0 retries
-  workers: process.env.CI ? 1 : 1, // ci run with 1 worker, local run with 1 workers
+  fullyParallel: false, // tests within a spec file run sequentially, preserving test order
+  retries: process.env.CI ? 2 : 0,
+  workers: 1,
   reporter: [["html"], ["list"]],
   use: {
     baseURL: config.ui.baseURL,

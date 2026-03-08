@@ -63,7 +63,6 @@ playwright.config.ts             — projects: api-testing, ui-testing
 | Command | What runs |
 |---|---|
 | `npm run api-test` | All API tests |
-| `npm run api-test:smoke` | API smoke only |
 | `npm run ui-test` | All UI tests (headed) |
 | `npm run ui-test:headless` | UI tests headless |
 | `npm run ui-test:debug` | UI with Playwright Inspector |

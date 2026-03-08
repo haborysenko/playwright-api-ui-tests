@@ -7,4 +7,3 @@ export const test = base.extend<{ pm: PageManager }>({
   },
 });
 
-export { expect } from "@playwright/test";

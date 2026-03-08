@@ -20,6 +20,6 @@ export class NavigationPage extends HelperBase {
 
   async newArticlePage() {
     await this.page.getByRole("link", { name: "New Article" }).click();
-    await this.waitForNumberOfSeconds(1); // allow the editor form to fully render before filling fields
+    await this.page.getByRole("textbox", { name: "Article Title" }).waitFor({ state: "visible" });
   }
 }
