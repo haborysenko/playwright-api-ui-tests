@@ -36,18 +36,23 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
     articleSlug = createArticleResponse.article.slug;
   });
 
-  test.beforeEach("log in and navigate to article via UI", async ({ pm, page, config }) => {
-    await pm.navigateTo().gotoHome();
-    await pm.navigateTo().loginPage();
-    await pm.auth().login(config.api.userEmail, config.api.userPassword);
-    await page.goto(`/article/${articleSlug}`);
+  test.beforeEach(
+    "log in and navigate to article via UI",
+    async ({ pm, page, config }) => {
+      await pm.navigateTo().gotoHome();
+      await pm.navigateTo().loginPage();
+      await pm.auth().login(config.api.userEmail, config.api.userPassword);
+      await page.goto(`/article/${articleSlug}`);
+    },
+  );
+
+  test.afterEach("delete article via API", async ({ api }) => {
+    await api.path(`/articles/${articleSlug}`).deleteRequest(204);
   });
 
-  // test.afterEach("delete article via API", async ({ api }) => {
-  //   await api.path(`/articles/${articleSlug}`).deleteRequest(204);
-  // });
-
-  test("should update article description and body via UI when article was created via API", async ({ pm }) => {
+  test("should update article description and body via UI when article was created via API", async ({
+    pm,
+  }) => {
     // Update only description/body/tag so slug stays the same and afterEach delete works
     await pm
       .article()
@@ -61,7 +66,10 @@ test.describe("Article UI | update article (API setup and teardown)", () => {
     // Reopen edit form and verify the updated values were persisted
     await pm.article().openEditForm();
     await expect(pm.article().titleInput()).toHaveValue(articleData.title);
-    await expect(pm.article().descriptionInput()).toHaveValue(updatedDescription);
+    await expect(pm.article().descriptionInput()).toHaveValue(
+      updatedDescription,
+    );
     await expect(pm.article().bodyInput()).toHaveValue(updatedBody);
+    await new Promise((resolve) => setTimeout(resolve, 500));
   });
 });
