@@ -122,4 +122,9 @@ export class ArticlePage extends HelperBase {
   async expectArticleTitleVisible(title: string) {
     await expect(this.page.getByRole("heading", { name: title })).toBeVisible();
   }
+
+  async waitForArticlePage() {
+    await expect(this.page).toHaveURL(/\/article\/.+/);
+    await expect(this.page.locator(".row.article-content")).toBeVisible();
+  }
 }

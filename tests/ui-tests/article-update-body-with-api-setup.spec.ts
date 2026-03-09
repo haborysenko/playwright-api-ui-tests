@@ -51,6 +51,7 @@ test.describe("Article UI | update article body field with API setup and teardow
     pm,
   }) => {
     await pm.article().updateArticle({ body: updatedBody });
+    await pm.article().waitForArticlePage();
     await pm.article().expectArticlePageValues({ body: updatedBody });
   });
 });

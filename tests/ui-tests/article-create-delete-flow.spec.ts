@@ -38,6 +38,7 @@ test.describe("Article UI | create and delete flow", () => {
         tag: articleData.initialTag,
       });
       await pm.article().goBack();
+      await pm.article().waitForArticlePage();
       await pm.article().expectArticlePageValues({
         title: articleData.initialTitle,
         body: articleData.initialBody,
