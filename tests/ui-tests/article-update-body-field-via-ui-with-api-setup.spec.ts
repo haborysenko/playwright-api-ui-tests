@@ -7,11 +7,11 @@ const test = baseApiTest.extend<{ pm: PageManager }>({
   pm: async ({ page }, use) => await use(new PageManager(page)),
 });
 
-test.describe("Article UI | update article body field with API setup and teardown", () => {
+test.describe("Article UI | update article title field with API setup and teardown", () => {
   const articleData = {
-    title: faker.lorem.words(3),
-    description: faker.lorem.sentence(),
-    body: faker.lorem.paragraph(),
+    initialTitle: faker.lorem.words(3),
+    initialDescription: faker.lorem.sentence(),
+    initialBody: faker.lorem.paragraph(),
   };
 
   const updatedBody = faker.lorem.paragraph();
@@ -23,9 +23,9 @@ test.describe("Article UI | update article body field with API setup and teardow
       .path("/articles")
       .body({
         article: {
-          title: articleData.title,
-          description: articleData.description,
-          body: articleData.body,
+          title: articleData.initialTitle,
+          description: articleData.initialDescription,
+          body: articleData.initialBody,
         },
       })
       .postRequest(201);

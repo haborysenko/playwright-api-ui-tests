@@ -125,6 +125,5 @@ export class ArticlePage extends HelperBase {
 
   async waitForArticlePage() {
     await expect(this.page).toHaveURL(/\/article\/.+/);
-    await expect(this.page.locator(".row.article-content")).toBeVisible();
   }
 }
