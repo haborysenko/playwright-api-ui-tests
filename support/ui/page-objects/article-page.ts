@@ -125,5 +125,6 @@ export class ArticlePage extends HelperBase {
 
   async waitForArticlePage() {
     await expect(this.page).toHaveURL(/\/article\/.+/);
+    await this.waitForNumberOfSeconds(3);
   }
 }
