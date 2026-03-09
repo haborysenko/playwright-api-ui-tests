@@ -7,14 +7,14 @@ const test = baseApiTest.extend<{ pm: PageManager }>({
   pm: async ({ page }, use) => await use(new PageManager(page)),
 });
 
-test.describe("Article UI | update article description field with API setup and teardown", () => {
+test.describe("Article UI | update article body field with API setup and teardown", () => {
   const articleData = {
     title: faker.lorem.words(3),
     description: faker.lorem.sentence(),
     body: faker.lorem.paragraph(),
   };
 
-  const updatedDescription = faker.lorem.sentence();
+  const updatedBody = faker.lorem.paragraph();
 
   let articleSlug: string;
 
@@ -47,12 +47,10 @@ test.describe("Article UI | update article description field with API setup and 
     await api.path(`/articles/${articleSlug}`).deleteRequest(204);
   });
 
-  test("should update article description field and verify the updated value", async ({
+  test("should update article body field and verify the updated value", async ({
     pm,
   }) => {
-    await pm.article().updateArticle({ description: updatedDescription });
-
-    //await pm.article().openEditForm();
-    //await pm.article().expectFormValues({ description: updatedDescription });
+    await pm.article().updateArticle({ body: updatedBody });
+    await pm.article().expectArticlePageValues({ body: updatedBody });
   });
 });

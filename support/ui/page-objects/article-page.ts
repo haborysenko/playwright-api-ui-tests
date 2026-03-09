@@ -37,10 +37,11 @@ export class ArticlePage extends HelperBase {
       .click();
   }
 
-  async expectFormValues(expected: {
+  async expectEditArticleFormValues(expected: {
     title?: string;
     description?: string;
     body?: string;
+    tag?: string;
   }) {
     if (expected.title !== undefined)
       await expect(
@@ -54,11 +55,32 @@ export class ArticlePage extends HelperBase {
       await expect(
         this.page.getByRole("textbox", { name: "Write your article (in" }),
       ).toHaveValue(expected.body);
+
+    if (expected.tag !== undefined)
+      await expect(this.page.getByText(expected.tag)).toBeVisible();
   }
 
-  /** Asserts the tag is visible on the page (e.g. as a tag chip; the "Enter tags" input is empty after adding). */
-  async expectTagVisible(tag: string) {
-    await expect(this.page.getByText(tag)).toBeVisible();
+  // Description is not part of the article form, so it is not included in the expected values.
+  async expectArticlePageValues(expected: {
+    title?: string;
+    body?: string;
+    tag?: string;
+  }) {
+    if (expected.title !== undefined) {
+      await expect(
+        this.page.getByRole("heading", { name: expected.title }),
+      ).toBeVisible();
+    }
+    if (expected.body !== undefined) {
+      await expect(
+        this.page.locator(".row.article-content").getByText(expected.body),
+      ).toBeVisible();
+    }
+    if (expected.tag !== undefined) {
+      await expect(
+        this.page.getByRole("list").filter({ hasText: expected.tag }),
+      ).toBeVisible();
+    }
   }
 
   async createArticle(
@@ -82,7 +104,8 @@ export class ArticlePage extends HelperBase {
   }) {
     await this.openEditForm();
     if (updates.title !== undefined) await this.fillTitle(updates.title);
-    if (updates.description !== undefined) await this.fillDescription(updates.description);
+    if (updates.description !== undefined)
+      await this.fillDescription(updates.description);
     if (updates.body !== undefined) await this.fillBody(updates.body);
     if (updates.tag !== undefined) await this.fillTag(updates.tag);
     await this.submitArticle();
@@ -97,8 +120,6 @@ export class ArticlePage extends HelperBase {
 
   /** Asserts the article heading (title) is visible on the page. */
   async expectArticleTitleVisible(title: string) {
-    await expect(
-      this.page.getByRole("heading", { name: title }),
-    ).toBeVisible();
+    await expect(this.page.getByRole("heading", { name: title })).toBeVisible();
   }
 }

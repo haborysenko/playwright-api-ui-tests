@@ -31,13 +31,18 @@ test.describe("Article UI | create and delete flow", () => {
 
     await test.step("Verify all fields after create", async () => {
       await pm.article().openEditForm();
-      await pm.article().expectFormValues({
+      await pm.article().expectEditArticleFormValues({
         title: articleData.initialTitle,
         description: articleData.initialDescription,
         body: articleData.initialBody,
+        tag: articleData.initialTag,
       });
-      await pm.article().expectTagVisible(articleData.initialTag);
       await pm.article().goBack();
+      await pm.article().expectArticlePageValues({
+        title: articleData.initialTitle,
+        body: articleData.initialBody,
+        tag: articleData.initialTag,
+      });
     });
 
     await test.step("Delete article", async () => {
