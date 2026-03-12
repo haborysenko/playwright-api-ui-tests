@@ -9,9 +9,9 @@ export class RequestHandler {
   private baseUrl: string | undefined;
   private defaultBaseUrl: string;
   private apiPath: string = "";
-  private queryParams: object = {};
+  private queryParams: Record<string, unknown> = {};
   private apiHeaders: Record<string, string> = {};
-  private apiBody: object = {};
+  private apiBody: Record<string, unknown> = {};
   private defaultAuthToken: string = "";
   private clearAuthFlag: boolean = false;
 
@@ -37,7 +37,7 @@ export class RequestHandler {
     return this;
   }
 
-  params(params: object) {
+  params(params: Record<string, unknown>) {
     this.queryParams = params;
     return this;
   }
@@ -47,7 +47,7 @@ export class RequestHandler {
     return this;
   }
 
-  body(body: object) {
+  body(body: Record<string, unknown>) {
     this.apiBody = body;
     return this;
   }
@@ -156,7 +156,7 @@ export class RequestHandler {
       `${this.baseUrl ?? this.defaultBaseUrl}${this.apiPath}`,
     );
     for (const [key, value] of Object.entries(this.queryParams)) {
-      url.searchParams.append(key, value);
+      url.searchParams.append(key, String(value));
     }
     return url.toString();
   }

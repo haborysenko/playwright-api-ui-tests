@@ -53,7 +53,7 @@ test.describe("Article API | list and full CRUD", () => {
     await test.step("Delete article and verify 404", async () => {
       await api.path(`/articles/${newSlug}`).deleteRequest(204);
       // GET deleted article returns 404 (body shape may vary: .error, .message, or .errors)
-      await api.path(`/articles/${slug}`).getRequest(404);
+      await api.path(`/articles/${newSlug}`).getRequest(404);
     });
   });
 });

@@ -2,12 +2,15 @@ import { test as baseApiTest } from "../api-tests/utils/fixtures";
 import { faker } from "@faker-js/faker";
 import { PageManager } from "../../support/ui/page-objects/page-manager";
 
-// This spec combines API infrastructure (auth token, RequestHandler) with UI page interactions
+// Extends the API fixture set (which provides `api`, `config`, and a worker-scoped `authToken`)
+// with the `pm` (PageManager) UI fixture. This gives the test access to both layers:
+// API fixtures handle setup/teardown (create and delete the article), while
+// PageManager drives the browser for the actual UI interaction being tested.
 const test = baseApiTest.extend<{ pm: PageManager }>({
   pm: async ({ page }, use) => await use(new PageManager(page)),
 });
 
-test.describe("Article UI | update article title field with API setup and teardown", () => {
+test.describe("Article UI | update article body field with API setup and teardown", () => {
   const articleData = {
     initialTitle: faker.lorem.words(3),
     initialDescription: faker.lorem.sentence(),
@@ -51,7 +54,6 @@ test.describe("Article UI | update article title field with API setup and teardo
     pm,
   }) => {
     await pm.article().updateArticle({ body: updatedBody });
-    // await pm.article().waitForArticlePage();
-    // await pm.article().expectArticlePageValues({ body: updatedBody });
+    await pm.article().expectArticlePageValues({ body: updatedBody });
   });
 });
