@@ -1,7 +1,6 @@
 import { APIRequestContext } from "@playwright/test";
 import { APILogger } from "./logger";
-import { expect } from "@playwright/test";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 export class RequestHandler {
   private request: APIRequestContext;
