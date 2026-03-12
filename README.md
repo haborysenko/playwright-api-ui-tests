@@ -1,30 +1,40 @@
 # Conduit Test Framework
 
-Playwright + TypeScript test framework targeting [Conduit](https://conduit.bondaracademy.com/) — a RealWorld-style app. Covers API testing (CRUD, negative/data-driven, schema validation) and UI testing (Page Object Model, form validation, hybrid API+UI flows).
+A production-style Playwright + TypeScript test framework built for [Conduit](https://conduit.bondaracademy.com/) — a RealWorld-spec app with a REST API and a React UI.
+
+This project demonstrates how to architect a maintainable, scalable test suite from scratch: custom abstractions over Playwright's native API, JSON schema validation, data generation, hybrid API+UI test flows, and a CI pipeline.
 
 ---
 
-## Quick start
+## What this covers
 
-```bash
-cp .env.example .env   # fill in your credentials
-npm install
-npx playwright test        # run all tests
-npx playwright show-report # open HTML report
-```
+| Area | What is tested |
+|---|---|
+| **API — happy path** | Full CRUD on articles: create, read, update, delete |
+| **API — negative / data-driven** | User registration with invalid usernames → 422 + error message |
+| **API — schema validation** | Every response validated against a generated Ajv JSON schema |
+| **UI — form validation** | Article form: required field errors and submit behavior |
+| **UI — full CRUD** | Create and delete an article end-to-end via the browser |
+| **UI — hybrid flow** | Article created via API, then updated via UI — no redundant UI setup |
 
-## CI
+---
 
-Tests run automatically on every push and pull request via GitHub Actions (`.github/workflows/playwright.yml`). API and UI tests run as separate parallel jobs.
+## Key design decisions
 
-Add these secrets to your GitHub repo under **Settings → Secrets and variables → Actions**:
+**Custom `RequestHandler` (fluent HTTP client)**
+All API calls go through a single class that auto-injects auth, logs request/response per test, asserts the expected status code, and resets state between calls. Tests never call `request.get/post` directly.
 
-| Secret          | Description                                 |
-| --------------- | ------------------------------------------- |
-| `API_BASE_URL`  | `https://conduit-api.bondaracademy.com/api` |
-| `UI_BASE_URL`   | `https://conduit.bondaracademy.com`         |
-| `USER_EMAIL`    | Test account email                          |
-| `USER_PASSWORD` | Test account password                       |
+**API-log-enriched assertions**
+`expect` is extended with custom matchers (`shouldBe`, `shouldEqual`, `shouldMatchSchema`). On failure, the error includes the full recent API activity — no digging through logs.
+
+**Schema generation + validation in one flag**
+Pass `true` to `shouldMatchSchema` on the first run to auto-generate a schema file with `genson-js`. Flip it to `false` for ongoing validation. No manual schema writing.
+
+**Page Object Model via `PageManager` facade**
+UI specs never import page objects directly. One `PageManager(page)` instance per test exposes `navigateTo()`, `auth()`, `article()`. Locators live inside methods — no class-level `Locator` properties.
+
+**Hybrid API+UI tests**
+UI tests that need pre-existing data set it up via `RequestHandler` in `beforeEach` — no driving the UI to create prerequisites.
 
 ---
 
@@ -33,113 +43,58 @@ Add these secrets to your GitHub repo under **Settings → Secrets and variables
 ```
 config/
   test-config.ts                 — URLs and credentials loaded from .env
-.env.example                     — required environment variables (copy to .env and fill in)
 support/
-  ui/
-    page-objects/                — Page Object Model: PageManager + page classes
   api/
     request-objects/             — base JSON payloads (POST_article.json, POST_user.json)
-    response-schemas/            — Ajv JSON schemas by resource
+    response-schemas/            — generated Ajv schemas by resource and method
+  ui/
+    page-objects/                — PageManager + NavigationPage, AuthPage, ArticlePage
 tests/
   api-tests/
     utils/                       — RequestHandler, fixtures, logger, custom-expect, schema-validator, data-generator
     helpers/create-token.ts      — standalone login helper → "Token <jwt>"
-    articles-list-and-crud.spec.ts — GET list + full CRUD (create, read, update, delete)
-    users-registration-username-validation.spec.ts — POST /users invalid username → 422
+    articles-list-and-crud.spec.ts
+    users-registration-username-validation.spec.ts
   ui-tests/
-    utils/
-      fixtures.ts                — pm fixture (PageManager)
-      ui-expect.ts               — UI assertion helpers
-    article-form-validation.spec.ts       — form validation (required fields)
-    article-crud-flow.spec.ts            — full CRUD via UI
-    article-update-with-api-setup.spec.ts — update via UI (article created via API)
+    utils/                       — fixtures (pm), ui-expect helpers
+    article-form-required-fields-validation.spec.ts
+    article-create-delete-flow.spec.ts
+    article-update-body-field-via-ui-with-api-setup.spec.ts
 playwright.config.ts             — projects: api-testing, ui-testing
 ```
 
 ---
 
-## Running tests
+## Quick start
 
-| Command                    | What runs                    |
-| -------------------------- | ---------------------------- |
-| `npm run api-test`         | All API tests                |
-| `npm run ui-test`          | All UI tests (headed)        |
-| `npm run ui-test:headless` | UI tests headless            |
-| `npm run ui-test:debug`    | UI with Playwright Inspector |
-| `npm run test:all`         | Everything                   |
+```bash
+cp .env.example .env   # fill in credentials
+npm install
+npm run test:all       # run everything
+npm run test:report    # open HTML report
+```
+
+## Run specific suites
+
+| Command | What runs |
+|---|---|
+| `npm run api-test` | All API tests |
+| `npm run ui-test` | All UI tests (headed) |
+| `npm run ui-test:headless` | UI tests headless |
+| `npm run ui-test:debug` | UI with Playwright Inspector |
+| `npm run ui-test:slow` | UI with 500ms slow-mo |
 
 ---
 
-## Framework overview
+## CI
 
-### RequestHandler — fluent HTTP client
+GitHub Actions runs API and UI tests as separate parallel jobs on every push and pull request.
 
-```ts
-const articles = await api
-  .path("/articles")
-  .params({ limit: 10 })
-  .getRequest(200);
-const created = await api.path("/articles").body(payload).postRequest(201);
-await api.path(`/articles/${slug}`).deleteRequest(204);
-```
+Required repository secrets (**Settings → Secrets and variables → Actions**):
 
-Each call auto-injects auth, logs request/response, asserts status, and wraps in `test.step()`.
-
-### Custom assertions
-
-Import `expect` from `./utils/custom-expect`. All matchers attach the last API call to failure messages.
-
-```ts
-await expect(response).shouldMatchSchema(
-  "articles",
-  "GET_article_schema",
-  false,
-);
-expect(response.title).shouldBe("expected value");
-expect(response.count).shouldBeLessThanOrEqual(10);
-```
-
-### Schema validation
-
-Run once with `true` to generate a schema file, then switch back to `false`:
-
-```ts
-await expect(response).shouldMatchSchema(
-  "articles",
-  "GET_article_schema",
-  true,
-); // generates
-await expect(response).shouldMatchSchema(
-  "articles",
-  "GET_article_schema",
-  false,
-); // validates
-```
-
-### Data generators
-
-```ts
-const article = getNewRandomArticle(); // cloned from POST_article.json + Faker fields
-const user = getNewRandomUser(); // cloned from POST_user.json + Faker fields
-```
-
-### Page Object Model
-
-```
-PageManager(page) → .navigateTo()  → NavigationPage
-                  → .auth()        → AuthPage
-                  → .article()     → ArticlePage
-```
-
-All UI specs use `PageManager` only — never import page objects directly.
-
----
-
-## Naming conventions
-
-| What                          | Convention                    |
-| ----------------------------- | ----------------------------- |
-| Files and folders             | kebab-case                    |
-| Classes and types             | PascalCase                    |
-| Functions, variables, methods | camelCase                     |
-| JSON schema files             | `METHOD_resource_schema.json` |
+| Secret | Value |
+|---|---|
+| `API_BASE_URL` | `https://conduit-api.bondaracademy.com/api` |
+| `UI_BASE_URL` | `https://conduit.bondaracademy.com` |
+| `USER_EMAIL` | Test account email |
+| `USER_PASSWORD` | Test account password |
